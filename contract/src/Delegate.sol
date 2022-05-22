@@ -116,11 +116,46 @@ contract DAOMIGovernance {
     uint256 propasalId = hashProposal(targets, values, calldatas, keccak256(bytes(description)));
   }
 
-  function state(uint proposalId) public {
+  function state(uint proposalId) public view returns(ProposalState){
+    ProposalCore storage proposal = _proposals[proposalId];
+    if(proposal.executed){
+      return ProposalState.Executed;
+    }
+    if(proposal.canceled){
+      return ProposalState.Canceled;
+    }
 
-  }  
+    uint256 snapshot = proposalSnapshot(proposalId);
+
+    if(snapshot == 0){
+      revert("unknown proposalId");
+    }
+    
+    if(snapshot >= block.number){
+      return ProposalState.Pending;
+    }
+
+    uint256 deadline = proposalDeadline(proposalId);
+
+    if(deadline >= block.number){
+    return ProposalState.Active; 
+    }
+  }
+  
+  function proposalSnapshot(uint256 proposalId) public view returns (uint256) {
+      return _proposals[proposalId].voteStart.getDeadline();
+  }
+  function proposalDeadline(uint256 proposalId) public view returns (uint256) {
+      return _proposals[proposalId].voteEnd.getDeadline();
+  }
+  /**
+   * @dev "The number of votes required in order for a voter to become a proposer"_.
+   */
+  function proposalThreshold() public view virtual returns (uint256) {
+      return 0;
+    
 }
-
+}
 interface TimelockInterface {
     function delay() external view returns (uint);
     function GRACE_PERIOD() external view returns (uint);
