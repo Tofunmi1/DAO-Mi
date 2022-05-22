@@ -103,7 +103,10 @@ contract DAOMIGovernance {
   }
 
   mapping(uint256 => ProposalVote) private _proposalVotes;
-  
+
+  function hasVoted(uint256 proposalId, address account) public view returns (bool) {
+     return _proposalVotes[proposalId].hasVoted[account];
+  } 
   function _quorumReached(uint256 proposalId) internal view returns(bool){
     ProposalVote storage proposalvote = _proposalVotes[proposalId];
     return (quorumVotes <= (proposalvote.againstVote + proposalvote.forVotes));
