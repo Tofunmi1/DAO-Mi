@@ -54,7 +54,12 @@ contract DAOMIGovernance {
 
       receive() external payable virtual {
         // require(_executor() == address(this));
-    }
+  }
+
+  constructor(address _timelock){
+   timelock = TimelockInterface(_timelock); 
+  }
+
   function votingDelay() public pure returns (uint) { return 1; } // 1 block
   function votingPeriod() public pure returns (uint) { return 17280; } // ~3 days in blocks (assuming 15s blocks)
 
