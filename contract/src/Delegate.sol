@@ -138,7 +138,7 @@ contract DAOMIGovernance {
     uint256 deadline = proposalDeadline(proposalId);
 
     if(deadline >= block.number){
-    return ProposalState.Active; 
+      return ProposalState.Active; 
     }
   }
   
