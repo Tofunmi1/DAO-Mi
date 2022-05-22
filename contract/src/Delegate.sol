@@ -88,7 +88,7 @@ contract DAOMIGovernance {
       bytes params
   );
 
-  /**+++++++============================================+++Vote count+++++===============================================================*/
+  /**+++++++============================================+++Vote count and vote code+++++===============================================================*/
   enum voteType{
     For,
     Against,
@@ -99,9 +99,18 @@ contract DAOMIGovernance {
     uint256 againstVote;
     uint256 forVotes;
     uint256 fenceVotes;
+    mapping(address => bool) hasVoted;
+  }
+
+  mapping(uint256 => ProposalVote) private _proposalVotes;
+  
+  function _quorumReached(uint256 proposalId) internal view returns(bool){
+    ProposalVote storage proposalvote = _proposalVotes[proposalId];
+    return (quorumVotes <= (proposalvote.againstVote + proposalvote.forVotes));
   }
   /**+++++++============================================+++Vote count+++++===============================================================*/
 
+  /**constructor for our governancedelegate our main or core contract */
   constructor(address _timelock){
    timelock = TimelockInterface(_timelock); 
   }
