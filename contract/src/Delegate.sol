@@ -17,6 +17,7 @@ contract DAOMIGovernance {
 
   uint public constant MIN_VOTING_DELAY = 40320;
 
+  ///4% of DAT our ERC20 token
   uint public quorumVotes = 400000e18;
 
   
@@ -57,12 +58,15 @@ contract DAOMIGovernance {
     Executed
   }
 
+  
+
   mapping(uint256 => ProposalCore) private _proposals; 
   
   mapping(uint256 => bytes32) private _timelockIds;
   
   uint public proposalCount;
-
+  
+  /**@dev  events*/
   event ProposalCreated(address[] targets, uint[] values, string[] signatures,bytes[] calldatas, uint256 startBlock,uint256 endBlock);
 
       receive() external payable virtual {
@@ -72,7 +76,9 @@ contract DAOMIGovernance {
 
 
   event ProposalExecuted(uint256 proposalId);
+
   event VoteCast(address indexed voter, uint256 proposalId, uint8 support, uint256 weight, string reason);
+
   event VoteCastWithParams(
       address indexed voter,
       uint256 proposalId,
@@ -81,6 +87,9 @@ contract DAOMIGovernance {
       string reason,
       bytes params
   );
+
+  /**+++++++============================================+++Vote count+++++===============================================================*/
+  /**+++++++============================================++++++++===============================================================*/
 
   constructor(address _timelock){
    timelock = TimelockInterface(_timelock); 
@@ -140,6 +149,7 @@ contract DAOMIGovernance {
     if(deadline >= block.number){
       return ProposalState.Active; 
     }
+
   }
   
   function proposalSnapshot(uint256 proposalId) public view returns (uint256) {
