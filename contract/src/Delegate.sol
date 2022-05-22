@@ -19,6 +19,7 @@ contract DAOMIGovernance {
 
   uint public quorumVotes = 400000e18;
 
+  
   uint public constant proposalMaxOperations = 10; // 10 actions
   
   TimelockInterface public timelock;
@@ -45,8 +46,20 @@ contract DAOMIGovernance {
     bool canceled;
   }
 
+  enum ProposalState {
+    Pending,
+    Active,
+    Canceled,
+    Defeated,
+    Succeeded,
+    Queued,
+    Expired,
+    Executed
+  }
 
   mapping(uint256 => ProposalCore) private _proposals; 
+  
+  mapping(uint256 => bytes32) private _timelockIds;
   
   uint public proposalCount;
 
@@ -72,7 +85,7 @@ contract DAOMIGovernance {
     require(targets.length == values.length, "invalid proposal length");
     require(targets.length == calldatas.length, "invalid proposal length");
     require(targets.length > 0, "empty proposal");
-    
+    proposalCount++; 
     ProposalCore storage propasal = _proposals[propasalId];
     
     uint64 snapshot = uint64(block.number + votingDelay());
@@ -86,6 +99,13 @@ contract DAOMIGovernance {
     return propasalId;
   }
 
+  function queue(address[] memory targets, uint[] memory values, string memory description,bytes[] memory calldatas) public pure{
+    uint256 propasalId = hashProposal(targets, values, calldatas, keccak256(bytes(description)));
+  }
+
+  function state(uint proposalId) public {
+
+  }  
 }
 
 interface TimelockInterface {
