@@ -106,7 +106,8 @@ contract DAOMIGovernance {
 
   function hasVoted(uint256 proposalId, address account) public view returns (bool) {
      return _proposalVotes[proposalId].hasVoted[account];
-  } 
+  }
+
   function _quorumReached(uint256 proposalId) internal view returns(bool){
     ProposalVote storage proposalvote = _proposalVotes[proposalId];
     return (quorumVotes <= (proposalvote.againstVote + proposalvote.forVotes));
@@ -181,6 +182,11 @@ contract DAOMIGovernance {
       return ProposalState.Active; 
     }
 
+    if(_quorumReached(proposalId) && _voteSucceeded(proposalId)){
+      return ProposalState.Succeeded;
+    }else{
+      return ProposalState.Defeated;
+    }
   }
   
   function proposalSnapshot(uint256 proposalId) public view returns (uint256) {
