@@ -68,6 +68,19 @@ contract DAOMIGovernance {
       receive() external payable virtual {
         // require(_executor() == address(this));
   }
+  event ProposalCanceled(uint256 proposalId);
+
+
+  event ProposalExecuted(uint256 proposalId);
+  event VoteCast(address indexed voter, uint256 proposalId, uint8 support, uint256 weight, string reason);
+  event VoteCastWithParams(
+      address indexed voter,
+      uint256 proposalId,
+      uint8 support,
+      uint256 weight,
+      string reason,
+      bytes params
+  );
 
   constructor(address _timelock){
    timelock = TimelockInterface(_timelock); 
