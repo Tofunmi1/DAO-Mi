@@ -108,6 +108,14 @@ contract DAOMIGovernance {
     ProposalVote storage proposalvote = _proposalVotes[proposalId];
     return (quorumVotes <= (proposalvote.againstVote + proposalvote.forVotes));
   }
+
+  function voteSucceeded(uint256 proposalId) internal view returns(bool){
+    ProposalVote storage proposalvote = _proposalVotes[proposalId];
+    if(proposalvote.forVotes > proposalvote.againstVote){
+      return true;
+    }
+    return false;
+  }
   /**+++++++============================================+++Vote count+++++===============================================================*/
 
   /**constructor for our governancedelegate our main or core contract */
