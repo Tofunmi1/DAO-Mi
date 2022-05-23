@@ -22,7 +22,18 @@ contract DAOMIGovernance {
 
     uint256 public constant proposalMaxOperations = 10; // 10 actions
 
+    /// @notice The EIP-712 typehash for the contract's domain
+    bytes32 public constant DOMAIN_TYPEHASH =
+        keccak256(
+            "EIP712Domain(string name,uint256 chainId,address verifyingContract)"
+        );
+
+    /// @notice The EIP-712 typehash for the ballot struct used by the contract
+    bytes32 public constant BALLOT_TYPEHASH =
+        keccak256("Ballot(uint256 proposalId,bool support)");
+
     TimelockInterface public timelock;
+    ERC20VoteInterface public erc20VoteToken;
 
     struct Propose {
         address proposer;
@@ -139,8 +150,9 @@ contract DAOMIGovernance {
     /**+++++++============================================+++Vote count+++++===============================================================*/
 
     /**constructor for our governancedelegate our main or core contract */
-    constructor(address _timelock) {
+    constructor(address _timelock, address _erc20VoteToken) {
         timelock = TimelockInterface(_timelock);
+        erc20VoteToken = ERC20VoteInterface(_erc20VoteToken);
     }
 
     function votingDelay() public pure returns (uint256) {
@@ -323,6 +335,22 @@ contract DAOMIGovernance {
     function proposalThreshold() public view virtual returns (uint256) {
         return 0;
     }
+
+    function castVote(uint256 proposalId, bool support) public {}
+
+    function _castVote(
+        address voter,
+        uint256 proposalId,
+        bool support
+    ) internal {}
+
+    function castVoteBySig(
+        uint256 proposalId,
+        bool support,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) public {}
 }
 
 /**Timelock idea 💥 gotten from compound */
@@ -358,4 +386,11 @@ interface TimelockInterface {
         bytes calldata data,
         uint256 eta
     ) external payable returns (bytes memory);
+}
+
+interface ERC20VoteInterface {
+    function getPriorVotes(address account, uint256 blockNumber)
+        external
+        view
+        returns (uint96);
 }
