@@ -88,7 +88,7 @@ contract DAOMIGovernance {
       bytes params
   );
 
-  /**+++++++============================================+++Vote count and vote code+++++===============================================================*/
+  /**+++++++=======================================+++++👽Vote count and vote code 👽+++++===========================================================*/
   enum voteType{
     For,
     Against,
@@ -153,9 +153,19 @@ contract DAOMIGovernance {
     return propasalId;
   }
 
-  function queue(address[] memory targets, uint[] memory values, string memory description,bytes[] memory calldatas) public pure{
-    uint256 propasalId = hashProposal(targets, values, calldatas, keccak256(bytes(description)));
+  function queue(address[] memory targets, uint[] memory values, string memory description,bytes[] memory calldatas) public {
+    uint256 proposalId = hashProposal(targets, values, calldatas, keccak256(bytes(description)));
+    require(state(proposalId) == ProposalState.Succeeded);
+    uint eta = (block.timestamp + timelock.delay());
+    string[] memory signatures =  new string[](targets.length);
+
+    for(uint i = 0; i < targets.length; i++){
+      _queueOrRevert(targets[i], values[i], signatures[i], calldatas[i], eta);
+    }
   }
+  
+  function _queueOrRevert(address target, uint value, string memory signature, bytes memory data, uint eta) internal{
+  }  
 
   function state(uint proposalId) public view returns(ProposalState){
     ProposalCore storage proposal = _proposals[proposalId];
@@ -203,6 +213,8 @@ contract DAOMIGovernance {
     
 }
 }
+
+/**Timelock idea 💥 gotten from compound */
 interface TimelockInterface {
     function delay() external view returns (uint);
     function GRACE_PERIOD() external view returns (uint);
