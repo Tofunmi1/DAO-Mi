@@ -35,12 +35,11 @@ contract DAOMIGovernance {
     TimelockInterface public timelock;
     ERC20VoteInterface public erc20VoteToken;
 
-    struct Propose {
+    struct Proposal {
         address proposer;
         uint256 id;
         uint256 forVoters;
         uint256 againstVoters;
-        bool queued;
         bool executed;
         address[] targets;
         uint256[] values;
@@ -48,6 +47,8 @@ contract DAOMIGovernance {
         uint256 startBlock;
         uint256 endBlock;
         string[] signatures;
+        bool canceled;
+        uint256 eta;
     }
 
     struct ProposalCore {
@@ -70,6 +71,8 @@ contract DAOMIGovernance {
 
     mapping(uint256 => ProposalCore) private _proposals;
 
+    mapping(uint256 => Proposal) public proposals;
+
     mapping(uint256 => bytes32) private _timelockIds;
 
     uint256 public proposalCount;
@@ -81,7 +84,8 @@ contract DAOMIGovernance {
         string[] signatures,
         bytes[] calldatas,
         uint256 startBlock,
-        uint256 endBlock
+        uint256 endBlock,
+        address proposer
     );
 
     receive() external payable virtual {
@@ -107,6 +111,13 @@ contract DAOMIGovernance {
         uint256 weight,
         string reason,
         bytes params
+    );
+
+    event VoteCast(
+        address voter,
+        uint256 proposalId,
+        bool support,
+        uint256 votes
     );
 
     /**+++++++=======================================+++++👽Vote count and vote code 👽+++++===========================================================*/
@@ -194,9 +205,27 @@ contract DAOMIGovernance {
         require(targets.length > 0, "empty proposal");
         proposalCount++;
         ProposalCore storage propasal = _proposals[propasalId];
+        //this is prolly not  neccessary, 😈, just checking how to use a struct, casue why not
 
         uint64 snapshot = uint64(block.number + votingDelay());
         uint64 deadline = uint64(snapshot + votingPeriod());
+        Proposal memory currentProposal = Proposal({
+            proposer: msg.sender,
+            id: propasalId,
+            forVoters: 0,
+            againstVoters: 0,
+            executed: false,
+            targets: targets,
+            values: values,
+            calldatas: calldatas,
+            startBlock: snapshot,
+            endBlock: deadline,
+            signatures: new string[](targets.length),
+            canceled: false,
+            eta: 0
+        });
+
+        proposals[currentProposal.id] = currentProposal;
 
         propasal.voteStart.setDeadline(snapshot);
         propasal.voteEnd.setDeadline(deadline);
@@ -208,7 +237,8 @@ contract DAOMIGovernance {
             new string[](targets.length),
             calldatas,
             snapshot,
-            deadline
+            deadline,
+            msg.sender
         );
         return propasalId;
     }
@@ -225,10 +255,11 @@ contract DAOMIGovernance {
             calldatas,
             keccak256(bytes(description))
         );
+        Proposal storage proposal = proposals[proposalId];
         require(state(proposalId) == ProposalState.Succeeded);
         uint256 eta = (block.timestamp + timelock.delay());
         string[] memory signatures = new string[](targets.length);
-
+        proposal.eta = eta;
         for (uint256 i = 0; i < targets.length; i++) {
             _queueOrRevert(
                 targets[i],
@@ -267,8 +298,13 @@ contract DAOMIGovernance {
             calldatas,
             keccak256(bytes(description))
         );
+        Proposal storage proposal = proposals[proposalId];
+        proposal.executed = true;
+        require(
+            state(proposalId) == ProposalState.Queued,
+            "GovernorAlpha::execute: proposal can only be executed if it is queued"
+        );
         string[] memory signatures = new string[](targets.length);
-        uint256 eta = (block.timestamp + timelock.delay());
 
         for (uint256 i = 0; i < targets.length; i++) {
             timelock.executeTransaction(
@@ -276,13 +312,13 @@ contract DAOMIGovernance {
                 values[i],
                 signatures[i],
                 calldatas[i],
-                eta
+                proposal.eta
             );
         }
     }
 
     function state(uint256 proposalId) public view returns (ProposalState) {
-        ProposalCore storage proposal = _proposals[proposalId];
+        Proposal storage proposal = proposals[proposalId];
         if (proposal.executed) {
             return ProposalState.Executed;
         }
@@ -336,13 +372,20 @@ contract DAOMIGovernance {
         return 0;
     }
 
-    function castVote(uint256 proposalId, bool support) public {}
+    function castVote(uint256 proposalId, bool support) public {
+        return _castVote(msg.sender, proposalId, support);
+    }
 
     function _castVote(
         address voter,
         uint256 proposalId,
         bool support
-    ) internal {}
+    ) internal {
+        require(
+            state(proposalId) == ProposalState.Active,
+            "_castVote: voting is closed"
+        );
+    }
 
     function castVoteBySig(
         uint256 proposalId,
