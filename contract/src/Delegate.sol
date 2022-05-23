@@ -17,7 +17,7 @@ contract DAOMIGovernance {
 
     uint256 public constant MIN_VOTING_DELAY = 40320;
 
-    ///4% of DAT our ERC20 token
+    ///4% of DAT our ERC20 $ token
     uint256 public quorumVotes = 400000e18;
 
     uint256 public constant proposalMaxOperations = 10; // 10 actions
@@ -318,34 +318,32 @@ contract DAOMIGovernance {
     }
 
     function state(uint256 proposalId) public view returns (ProposalState) {
+        require(
+            proposalCount >= proposalId && proposalId > 0,
+            "GovernorAlpha::state: invalid proposal id"
+        );
         Proposal storage proposal = proposals[proposalId];
-        if (proposal.executed) {
-            return ProposalState.Executed;
-        }
         if (proposal.canceled) {
             return ProposalState.Canceled;
-        }
-
-        uint256 snapshot = proposalSnapshot(proposalId);
-
-        if (snapshot == 0) {
-            revert("unknown proposalId");
-        }
-
-        if (snapshot >= block.number) {
+        } else if (block.number <= proposal.startBlock) {
             return ProposalState.Pending;
-        }
-
-        uint256 deadline = proposalDeadline(proposalId);
-
-        if (deadline >= block.number) {
+        } else if (block.number <= proposal.endBlock) {
             return ProposalState.Active;
-        }
-
-        if (_quorumReached(proposalId) && _voteSucceeded(proposalId)) {
-            return ProposalState.Succeeded;
-        } else {
+        } else if (
+            proposal.forVoters <= proposal.againstVoters ||
+            proposal.forVoters < quorumVotes
+        ) {
             return ProposalState.Defeated;
+        } else if (proposal.eta == 0) {
+            return ProposalState.Succeeded;
+        } else if (proposal.executed) {
+            return ProposalState.Executed;
+        } else if (
+            block.timestamp >= uint256(proposal.eta + timelock.GRACE_PERIOD())
+        ) {
+            return ProposalState.Expired;
+        } else {
+            return ProposalState.Queued;
         }
     }
 
@@ -385,6 +383,25 @@ contract DAOMIGovernance {
             state(proposalId) == ProposalState.Active,
             "_castVote: voting is closed"
         );
+        Proposal storage proposal = proposals[proposalId];
+        ProposalVote storage receipt = _proposalVotes[proposalId];
+        require(
+            hasVoted(proposalId, voter) == false,
+            "GovernorAlpha::_castVote: voter already voted"
+        );
+        uint96 votes = erc20VoteToken.getPriorVotes(voter, proposal.startBlock);
+
+        if (support) {
+            proposal.forVoters = uint256(proposal.forVoters + votes);
+        } else {
+            proposal.againstVoters = uint256(proposal.againstVoters + votes);
+        }
+
+        receipt.hasVoted[voter] = true;
+        receipt.againstVote = proposal.againstVoters;
+        receipt.forVotes = proposal.forVoters;
+
+        emit VoteCast(voter, proposalId, support, votes);
     }
 
     function castVoteBySig(
@@ -393,7 +410,36 @@ contract DAOMIGovernance {
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) public {}
+    ) public {
+        bytes32 domainSeparator = keccak256(
+            abi.encode(
+                DOMAIN_TYPEHASH,
+                keccak256(bytes(name)),
+                getChainId(),
+                address(this)
+            )
+        );
+        bytes32 structHash = keccak256(
+            abi.encode(BALLOT_TYPEHASH, proposalId, support)
+        );
+        bytes32 digest = keccak256(
+            abi.encodePacked("\x19\x01", domainSeparator, structHash)
+        );
+        address signatory = ecrecover(digest, v, r, s);
+        require(
+            signatory != address(0),
+            "GovernorAlpha::castVoteBySig: invalid signature"
+        );
+        return _castVote(signatory, proposalId, support);
+    }
+
+    function getChainId() internal view returns (uint256) {
+        uint256 chainId;
+        assembly {
+            chainId := chainid()
+        }
+        return chainId;
+    }
 }
 
 /**Timelock idea 💥 gotten from compound */
