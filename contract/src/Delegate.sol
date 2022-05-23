@@ -163,6 +163,7 @@ contract DAOMIGovernance {
       _queueOrRevert(targets[i], values[i], signatures[i], calldatas[i], eta);
     }
   }
+  
   function _queueOrRevert(address target, uint value, string memory signature, bytes memory data, uint eta) internal{
   }  
 
