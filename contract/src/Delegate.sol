@@ -165,7 +165,19 @@ contract DAOMIGovernance {
   }
   
   function _queueOrRevert(address target, uint value, string memory signature, bytes memory data, uint eta) internal{
+    require(!timelock.queuedTransactions(keccak256(abi.encodePacked(target,value,signature,data,eta))));
+    timelock.queueTransaction(target, value, signature, data, eta);
   }  
+
+  function execute(address[] memory targets, uint[] memory values, string memory description,bytes[] memory calldatas) public payable{
+    uint256 proposalId = hashProposal(targets, values, calldatas, keccak256(bytes(description)));
+    string[] memory signatures =  new string[](targets.length);
+    uint eta = (block.timestamp + timelock.delay());
+    
+    for(uint i = 0; i < targets.length; i++){
+      timelock.executeTransaction(targets[i], values[i], signatures[i], calldatas[i], eta);
+    }
+  }
 
   function state(uint proposalId) public view returns(ProposalState){
     ProposalCore storage proposal = _proposals[proposalId];
