@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { ethers } from "ethers";
 
 declare global {
@@ -21,11 +21,14 @@ interface ProviderProps {
 }
 
 export const Provider: React.FC<ProviderProps> = ({ children }) => {
-  const [provider, setProvider] = useState<ethers.providers.Web3Provider>();
+  const [provider, setProvider] = useState<ethers.providers.Web3Provider>(
+    window.ethereum
+  );
 
   const getBlockChain = useCallback(() => {
     if (window.ethereum) {
-      setProvider(window.ethereum);
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      setProvider(provider);
     }
   }, []);
 
