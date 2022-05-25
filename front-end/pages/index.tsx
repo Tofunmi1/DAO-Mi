@@ -7,6 +7,7 @@ import { ethers } from "ethers";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 
 const Home: NextPage = () => {
+  const [connected, setConnected] = useState<boolean>(false);
   const providerOptions = {
     /* See Provider Options Section */
     walletconnect: {
@@ -20,11 +21,25 @@ const Home: NextPage = () => {
     cacheProvider: true, // optional
     providerOptions, // required
   });
+
+  const handleWalletStatus = (provider: ethers.providers.Web3Provider) => {
+    typeof provider == "object"
+      ? setConnected(true)
+      : typeof provider == undefined || null
+      ? setConnected(false)
+      : setConnected(true);
+  };
   let provider: ethers.providers.Web3Provider;
+
   const handleWalletConnect = async () => {
     const instance = await web3Modal.connect();
-    provider = instance;
-    console.log(provider);
+    const provider = new ethers.providers.Web3Provider(instance);
+    console.log(`provider:\n${provider}`);
+    typeof provider == "object"
+      ? setConnected(true)
+      : typeof provider == undefined || null
+      ? setConnected(false)
+      : setConnected(true);
   };
 
   return (
@@ -38,12 +53,16 @@ const Home: NextPage = () => {
         <div className="text-3xl p-4 ml-10 text-white font-extrabold">
           THE DAO
         </div>
-        <button
-          onClick={handleWalletConnect}
-          className="h-8 my-auto w-60 text-2xl rounded-xl  bg-green-300/40 relative left-[70%] text-white hover:bg-green-500"
-        >
-          connect wallet
-        </button>
+        {connected ? (
+          <div className="text-white">connected</div>
+        ) : (
+          <button
+            onClick={handleWalletConnect}
+            className="h-8 my-auto w-60 text-2xl rounded-xl  bg-green-300/40 relative left-[70%] text-white hover:bg-green-500"
+          >
+            connect wallet
+          </button>
+        )}
       </header>
       <main>
         <div className="text-3xl text-emerald-800">
