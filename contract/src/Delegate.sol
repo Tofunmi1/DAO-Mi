@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.13;
 
-import "contract/src/mechanisms/Timers.sol";
+import "./mechanisms/Timers.sol";
 
 contract DAOMIGovernance {
     using Timers for Timers.BlockNumber;

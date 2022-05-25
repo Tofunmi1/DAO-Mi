@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { ethers } from "ethers";
+import { log } from "./console";
+import dynamic from "next/dynamic";
 
 declare global {
   interface Window {
@@ -13,7 +15,7 @@ interface ProviderOptions {
 }
 
 export const ProviderContext = React.createContext<ProviderOptions>({
-  provider: window.ethereum,
+  provider: undefined,
 });
 
 interface ProviderProps {
@@ -29,7 +31,9 @@ export const Provider: React.FC<ProviderProps> = ({ children }) => {
     if (window.ethereum) {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       setProvider(provider);
+      log("hi mom");
     }
+    if (!window.ethereum) log("window.ethereum not enabled");
   }, []);
 
   useEffect(() => {
@@ -44,3 +48,7 @@ export const Provider: React.FC<ProviderProps> = ({ children }) => {
     </ProviderContext.Provider>
   );
 };
+
+export default dynamic(() => Promise.resolve(Provider), {
+  ssr: false,
+});
