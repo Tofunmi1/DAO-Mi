@@ -1,11 +1,13 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
-import { useEffect, useState, Fragment } from "react";
+import { useEffect, useState, Fragment, FormEvent } from "react";
 import Web3Modal from "web3modal";
 import { ethers } from "ethers";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import { Dialog, Transition } from "@headlessui/react";
+import ProposalForm, { formPropsArr } from "../components/ProposalForm";
+import { DAOMIGovernance__factory } from "../typechain-types/Governance-types/ethers-contracts";
 
 declare global {
   interface Window {
@@ -16,7 +18,10 @@ declare global {
 
 const Home: NextPage = () => {
   const [connected, setConnected] = useState<boolean>(false);
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
+  const [form, setForm] = useState<formPropsArr>([
+    { targets: [], values: [], description: "", calldatas: [] },
+  ]);
 
   const closeModal = () => {
     setIsOpen(false);
@@ -35,6 +40,7 @@ const Home: NextPage = () => {
       },
     },
   };
+
   const web3Modal = new Web3Modal({
     cacheProvider: true, // optional
     providerOptions, // required
@@ -47,10 +53,12 @@ const Home: NextPage = () => {
       ? setConnected(false)
       : setConnected(true);
   };
+
   useEffect(() => {
     if (window.ethereum) {
     }
   }, [handleWalletStatus]);
+
   let provider: ethers.providers.Web3Provider;
 
   const handleWalletConnect = async () => {
@@ -58,6 +66,16 @@ const Home: NextPage = () => {
     const provider = new ethers.providers.Web3Provider(instance);
     console.log(`provider:\n${provider}`);
     handleWalletStatus(provider);
+  };
+
+  const handleProposalSubmit = async (e: any) => {
+    e.preventDefault();
+    const instance = await web3Modal.connect();
+    const provider = new ethers.providers.Web3Provider(instance);
+    const signer = provider.getSigner();
+    console.log("hola DEA");
+    console.log(form[0].targets);
+    e.target.reset();
   };
 
   return (
@@ -84,14 +102,17 @@ const Home: NextPage = () => {
         )}
       </header>
 
-      <main>
-        <div className="mx-auto h-40 w-[90%] flex flex-row border-b-2 border-b-lime-700 relative">
+      <main className="mt-16 absolute w-full">
+        <div className="mx-auto h-20 w-[90%] flex flex-row border-b-2 border-b-lime-700 relatve">
+          <div className="relative max-w-[40%] left-[2%] my-auto">
+            <span>Proposals</span>
+          </div>
           <button
             type="button"
             onClick={openModal}
-            className="rounded-md bg-black h-16 my-auto relative px-4 py-2 text-2xl font-medium text-white hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"
+            className="rounded-md bg-green-300 h-16 my-auto m-4 p-4 text-2xl font-medium text-white hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 left-[79%] relative"
           >
-            create Proposal
+            New Proposal
           </button>
         </div>
 
@@ -128,21 +149,15 @@ const Home: NextPage = () => {
                       Create a new proposal
                     </Dialog.Title>
                     <div className="mt-2">
-                      <p className="text-sm text-gray-500">
-                        Your payment has been successfully submitted. We’ve sent
-                        you an email with all of the details of your order.
-                      </p>
+                      <ProposalForm
+                        handleModalClose={closeModal}
+                        handleForm={handleProposalSubmit}
+                        setForm={setForm}
+                        form={form}
+                      />
                     </div>
 
-                    <div className="mt-4">
-                      <button
-                        type="button"
-                        className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                        onClick={closeModal}
-                      >
-                        Submit Proposal
-                      </button>
-                    </div>
+                    <div className="mt-4"></div>
                   </Dialog.Panel>
                 </Transition.Child>
               </div>
