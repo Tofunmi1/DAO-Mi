@@ -263,7 +263,7 @@ export interface DAOMIGovernanceInterface extends utils.Interface {
 
   events: {
     "ProposalCanceled(uint256)": EventFragment;
-    "ProposalCreated(address[],uint256[],string[],bytes[],uint256,uint256,address)": EventFragment;
+    "ProposalCreated(uint256,address[],uint256[],string[],bytes[],uint256,uint256,address)": EventFragment;
     "ProposalExecuted(uint256)": EventFragment;
     "VoteCast(address,uint256,uint8,uint256,string)": EventFragment;
     "VoteCast(address,uint256,bool,uint256)": EventFragment;
@@ -294,6 +294,7 @@ export type ProposalCanceledEventFilter =
   TypedEventFilter<ProposalCanceledEvent>;
 
 export interface ProposalCreatedEventObject {
+  proposalId: BigNumber;
   targets: string[];
   values: BigNumber[];
   signatures: string[];
@@ -303,7 +304,16 @@ export interface ProposalCreatedEventObject {
   proposer: string;
 }
 export type ProposalCreatedEvent = TypedEvent<
-  [string[], BigNumber[], string[], string[], BigNumber, BigNumber, string],
+  [
+    BigNumber,
+    string[],
+    BigNumber[],
+    string[],
+    string[],
+    BigNumber,
+    BigNumber,
+    string
+  ],
   ProposalCreatedEventObject
 >;
 
@@ -750,7 +760,8 @@ export interface DAOMIGovernance extends BaseContract {
     "ProposalCanceled(uint256)"(proposalId?: null): ProposalCanceledEventFilter;
     ProposalCanceled(proposalId?: null): ProposalCanceledEventFilter;
 
-    "ProposalCreated(address[],uint256[],string[],bytes[],uint256,uint256,address)"(
+    "ProposalCreated(uint256,address[],uint256[],string[],bytes[],uint256,uint256,address)"(
+      proposalId?: null,
       targets?: null,
       values?: null,
       signatures?: null,
@@ -760,6 +771,7 @@ export interface DAOMIGovernance extends BaseContract {
       proposer?: null
     ): ProposalCreatedEventFilter;
     ProposalCreated(
+      proposalId?: null,
       targets?: null,
       values?: null,
       signatures?: null,
