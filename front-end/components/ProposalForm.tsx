@@ -3,10 +3,10 @@ import { produce } from "immer";
 import stringifiedArrayOfStringsToArray from "../utlis/arrayStringifier";
 
 interface formProps {
-  targets: string[];
-  values: string[];
-  description: string;
-  calldatas: string[];
+  targets: any;
+  values: any;
+  description: any;
+  calldatas: any;
 }
 
 export type formPropsArr = formProps[];
@@ -38,22 +38,23 @@ const ProposalForm = ({
                 onSubmit={handleForm}
               >
                 <input
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border-2 border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-orange-600 focus:border-orange-600 focus:z-10 sm:text-sm"
+                  className="appearance-none rounded-none relative block w-full px-3 py-2 border-2 border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-gray-600 focus:border-gray-600 focus:z-10 sm:text-sm"
                   placeholder="targets[]"
                   name="form[]"
                   onChange={(e) => {
                     const rawTarget = e.target.value;
                     // const targets = stringifiedArrayOfStringsToArray(rawTarget);
-                    const targets = rawTarget.split(",");
+                    const targets = rawTarget.split("]");
+                    const x = targets.slice(1, targets.length - 1);
                     setForm((form) =>
                       produce(form, (v) => {
-                        v[idx].targets = targets;
+                        v[idx].targets = x;
                       })
                     );
                   }}
                 />
                 <input
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border-2 border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-orange-600 focus:border-orange-600 focus:z-10 sm:text-sm"
+                  className="appearance-none rounded-none relative block w-full px-3 py-2 border-2 border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-gray-600 focus:border-gray-600 focus:z-10 sm:text-sm"
                   placeholder="values[]"
                   type="text"
                   onChange={(e) => {
@@ -62,13 +63,13 @@ const ProposalForm = ({
                     const values = rawValues.split(",");
                     setForm((form) =>
                       produce(form, (v) => {
-                        v[idx].values = values;
+                        v[idx].values = rawValues;
                       })
                     );
                   }}
                 />
                 <input
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border-2 border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-orange-600 focus:border-orange-600 focus:z-10 sm:text-sm"
+                  className="appearance-none rounded-none relative block w-full px-3 py-2 border-2 border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-gray-600 focus:border-gray-600 focus:z-10 sm:text-sm"
                   placeholder="proposal description"
                   type="text"
                   onChange={(e) => {
@@ -81,7 +82,7 @@ const ProposalForm = ({
                   }}
                 />
                 <input
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border-2 border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-orange-600 focus:border-orange-600 focus:z-10 sm:text-sm"
+                  className="appearance-none rounded-none relative block w-full px-3 py-2 border-2 border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-gray-600 focus:border-gray-600 focus:z-10 sm:text-sm"
                   placeholder="calldatas[]"
                   type="text"
                   onChange={(e) => {
@@ -90,7 +91,7 @@ const ProposalForm = ({
                     // stringifiedArrayOfStringsToArray(rawCalldatas);
                     setForm((form) =>
                       produce(form, (v) => {
-                        v[idx].calldatas = calldatas;
+                        v[idx].calldatas = rawCalldatas;
                       })
                     );
                   }}
@@ -99,7 +100,7 @@ const ProposalForm = ({
                   disabled={!form}
                   type="submit"
                   onClick={handleModalClose}
-                  className="flex flex-row w-full h-10 bg-orange-600 mt-2 rounded-[8px]"
+                  className="flex flex-row w-full h-10 bg-gray-600 mt-2 rounded-[8px]"
                 >
                   <span className="p-2">
                     <svg

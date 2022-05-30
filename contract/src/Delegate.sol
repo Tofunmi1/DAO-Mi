@@ -49,6 +49,8 @@ contract DAOMIGovernance {
         string[] signatures;
         bool canceled;
         uint256 eta;
+        string description;
+
     }
 
     struct ProposalCore {
@@ -223,7 +225,8 @@ contract DAOMIGovernance {
             endBlock: deadline,
             signatures: new string[](targets.length),
             canceled: false,
-            eta: 0
+            eta: 0,
+            description: description
         });
 
         proposals[currentProposal.id] = currentProposal;

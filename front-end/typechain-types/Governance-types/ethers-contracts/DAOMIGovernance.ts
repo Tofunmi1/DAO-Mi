@@ -478,7 +478,8 @@ export interface DAOMIGovernance extends BaseContract {
         BigNumber,
         BigNumber,
         boolean,
-        BigNumber
+        BigNumber,
+        string
       ] & {
         proposer: string;
         id: BigNumber;
@@ -489,6 +490,7 @@ export interface DAOMIGovernance extends BaseContract {
         endBlock: BigNumber;
         canceled: boolean;
         eta: BigNumber;
+        description: string;
       }
     >;
 
@@ -598,7 +600,8 @@ export interface DAOMIGovernance extends BaseContract {
       BigNumber,
       BigNumber,
       boolean,
-      BigNumber
+      BigNumber,
+      string
     ] & {
       proposer: string;
       id: BigNumber;
@@ -609,6 +612,7 @@ export interface DAOMIGovernance extends BaseContract {
       endBlock: BigNumber;
       canceled: boolean;
       eta: BigNumber;
+      description: string;
     }
   >;
 
@@ -715,7 +719,8 @@ export interface DAOMIGovernance extends BaseContract {
         BigNumber,
         BigNumber,
         boolean,
-        BigNumber
+        BigNumber,
+        string
       ] & {
         proposer: string;
         id: BigNumber;
@@ -726,6 +731,7 @@ export interface DAOMIGovernance extends BaseContract {
         endBlock: BigNumber;
         canceled: boolean;
         eta: BigNumber;
+        description: string;
       }
     >;
 
