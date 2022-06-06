@@ -1,11 +1,14 @@
 import "../styles/globals.css";
 import type { AppProps } from "next/app";
 import Provider from "../utlis/Provider";
+import { DAppProvider } from "@usedapp/core";
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <Provider>
-      <Component {...pageProps} />
+      <DAppProvider config={{}}>
+        <Component {...pageProps} />
+      </DAppProvider>
     </Provider>
   );
 }

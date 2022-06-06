@@ -13,6 +13,7 @@ import { GovernanceERC20__factory } from "../typechain-types/Token-types/ethers-
 import Proposal, { ProposalProps } from "../components/Proposal";
 import type { Provider, TransactionRequest } from "@ethersproject/providers";
 import { ProposalCreatedEvent } from "../typechain-types/Governance-types/ethers-contracts/DAOMIGovernance";
+import WalletConnectButton from "../components/WalletConnectButton";
 
 declare global {
   interface Window {
@@ -107,8 +108,8 @@ const Home: NextPage = () => {
     // console.lo
     const proposalIdTx = await contract.propose(
       ["0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"],
-      [0],
-      "adding liquidity burn to uniswappv3 and some  interaction with compound",
+      [2],
+      "doing some stuffs on ",
       ["0x000b23"]
     );
     console.log(form[0]);
@@ -205,8 +206,8 @@ const Home: NextPage = () => {
         againstVoters: utils.formatUnits(getProposal.againstVoters),
       };
       pros.push(proposalObj);
-      setProposals(pros);
     }
+    setProposals(pros);
   };
 
   useEffect(() => {
@@ -226,25 +227,16 @@ const Home: NextPage = () => {
         <div className="text-xl md:text-2xl lg:text-3xl p-4 ml-10 text-gray-700 font-extrabold">
           THE-DAOPro
         </div>
-        {connected ? (
+        {/* {connected ? (
           <div className="text-white">connected</div>
-        ) : (
-          <button
-            onClick={handleWalletConnect}
-            className="h-12 font-bold my-auto w-60 text-xl border-2 border-gray-700 rounded-lg bg-white relative left-[-2%] md:left-[39%] lg:left-[48%] xl:left-[57%] sm:left-[30%] text-gray-700 flex flex-row justify-center items-center space-x-4"
-          >
-            <div className="text-blue-600">
-              <Image
-                src={`/icons8-wallet-64.svg`}
-                alt={`connect-wallet-icon`}
-                height={50}
-                width={50}
-                color={"blue"}
-              />
-            </div>
-            connect wallet
-          </button>
-        )}
+        ) : ( */}
+        <div
+          onClick={handleWalletConnect}
+          className="my-auto relative left-[-2%] md:left-[39%] lg:left-[48%] xl:left-[57%] sm:left-[30%] flex flex-row justify-center items-center space-x-4"
+        >
+          <WalletConnectButton handleWalletConnect={handleWalletConnect} />
+        </div>
+        {/* )} */}
       </header>
 
       <div className="flex flex-row items-center justify-center absolute mt-16 h-20 w-full bg-gray-500">
@@ -315,11 +307,11 @@ const Home: NextPage = () => {
         </Transition>
       </section>
 
-      <section>
+      <section className="absolute mt-80 w-full">
         {proposals.map((proposal, index) => {
           return (
             <NextLink href={`/proposal/${proposal.proposalId}`} key={index}>
-              <div className="w-full flex flex-col justify-center items-center mx-auto space-y-2">
+              <div className="w-full flex flex-col justify-center items-center mx-auto space-y-6">
                 <Proposal
                   proposalId={proposal.proposalId}
                   description={proposal.description}
